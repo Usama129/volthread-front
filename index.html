@@ -301,7 +301,7 @@
                 2000 : parseInt($("#items-per-page option:selected").text())
             return new Promise((resolve, reject) => {
                 $.get("https://volthread-node.herokuapp.com/count", function (response) {
-                    totalPages = Math.floor(response[0].employee_count / itemsPerPage)
+                    totalPages = Math.ceil(response[0].employee_count / itemsPerPage)
                     resolve(totalPages)
                 }).fail(function () {
                     console.log("Failed to find page count")
