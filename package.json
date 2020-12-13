@@ -1,0 +1,14 @@
+{
+  "name": "volthread-front",
+  "version": "1.0.0",
+  "description": "Front page for employee views",
+  "main": "app.js",
+  "scripts": {
+    "test": "node app"
+  },
+  "author": "Usama Humayun",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
