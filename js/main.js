@@ -217,26 +217,26 @@ function closeForm() {
 }
 
 function submitData(){
-    let data = $('#add-form-element').serializeArray().reduce(function(obj, item) {
+    let form_data = $('#add-form-element').serializeArray().reduce(function(obj, item) {
         obj[item.name] = item.value;
         return obj;
     }, {});
 
     let emptyField = false
     let inputCheck = true
-    for (let item in data){
+    for (let item in form_data){
         let dateRegex = /^(?:(?:31(\/|-|\.)(?:0?[13578]|1[02]))\1|(?:(?:29|30)(\/|-|\.)(?:0?[13-9]|1[0-2])\2))(?:(?:1[6-9]|[2-9]\d)?\d{2})$|^(?:29(\/|-|\.)0?2\3(?:(?:(?:1[6-9]|[2-9]\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\d|2[0-8])(\/|-|\.)(?:(?:0?[1-9])|(?:1[0-2]))\4(?:(?:1[6-9]|[2-9]\d)?\d{2})$/
-        if (!data[item]){
+        if (!form_data[item]){
             emptyField = true
-        } else if (item === "id" && /\D/.test(data[item])) {
+        } else if (item === "id" && /\D/.test(form_data[item])) {
             sendError("ID must be numeric", true)
             inputCheck = false
-        } else if (item === "birth_date" && (!dateRegex.test(data[item])
-            || data[item].includes('.'))) {
+        } else if (item === "birth_date" && (!dateRegex.test(form_data[item])
+            || form_data[item].includes('.'))) {
             sendError("Birth date must be entered as dd/mm/yyyy", true)
             inputCheck = false
-        } else if (item === "join_date" && (!dateRegex.test(data[item])
-            || data[item].includes('.'))){
+        } else if (item === "join_date" && (!dateRegex.test(form_data[item])
+            || form_data[item].includes('.'))){
             sendError("Join date must be entered as dd/mm/yyyy", true)
             inputCheck = false
         }
@@ -253,13 +253,17 @@ function submitData(){
         url: "https://volthread-node.herokuapp.com/add",
         dataType: 'json',
         contentType: 'application/json',
-        data: JSON.stringify(data),
+        data: JSON.stringify(form_data),
     })
         .done(function(data) {
             if (data.submit === "successful") {
                 closeForm()
                 if (activePage === totalPages){
-                    addRow(data)
+                    getNewForCurrentPage()
+                    getPageCount().then((result) => {
+                        setPageNumbers(activePage)
+                    })
+
                 } else {
 
                 }
@@ -310,13 +314,10 @@ function updatePage(){
     if (request.readyState !== 4)
         return
     if (request.status === 200) {
+        $(".main-table tr:gt(0)").remove();
         let response = JSON.parse(request.responseText)
-
         for (let row of response.data){
-            if ($('td:contains(' + row.employee_id + ')').length === 0) {
-                addRow(row)
-                return
-            }
+            addRow(row)
         }
     }
 }
