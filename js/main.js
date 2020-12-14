@@ -258,15 +258,10 @@ function submitData(){
         .done(function(data) {
             if (data.submit === "successful") {
                 closeForm()
-                if (activePage === totalPages){
-                    getNewForCurrentPage()
-                    getPageCount().then((result) => {
-                        setPageNumbers(activePage)
-                    })
-
-                } else {
-
-                }
+                getNewForCurrentPage()
+                getPageCount().then((result) => {
+                    setPageNumbers(activePage)
+                })
                 sendError("Added Employee Successfully", true)
             }
         })
