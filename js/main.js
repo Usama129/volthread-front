@@ -98,7 +98,7 @@ function getEmployees(pageNo, itemsPerPage){
     if (itemsPerPage > 100 || isNaN(pageNo))
         pageNo = 1
     return new Promise((resolve, reject) => {
-        $.get("https://volthread-node.herokuapp.com/employees",
+        $.get("http://localhost:8080/employees",
             {page : pageNo, items : itemsPerPage},
             function(data) {
                 if (String(data.count) !== String(itemsPerPage))
@@ -107,7 +107,7 @@ function getEmployees(pageNo, itemsPerPage){
 
                 count = data.count
                 try {
-                    for (let emp of data.data){
+                    for (let emp of data.list){
                         addRow(emp)
                     }
 
@@ -201,11 +201,11 @@ function getPageCount(){
     let itemsPerPage = isNaN(parseInt($("#items-per-page option:selected").text())) ?
         0 : parseInt($("#items-per-page option:selected").text())
     return new Promise((resolve, reject) => {
-        $.get("https://volthread-node.herokuapp.com/count", function (response) {
-            totalPages = itemsPerPage === 0 ? 1 : Math.ceil(response[0].employee_count / itemsPerPage)
+        $.get("http://localhost:8080/count", function (response) {
+            totalPages = itemsPerPage === 0 ? 1 : Math.ceil(response.employeeCount / itemsPerPage)
             resolve(totalPages)
         }).fail(function () {
-            console.log("Failed to find page count")
+            sendError("Failed to get page count")
             reject("Failed to find page count")
         })
     })
@@ -231,11 +231,11 @@ function submitData(){
         } else if (item === "id" && /\D/.test(form_data[item])) {
             sendError("ID must be numeric", true)
             inputCheck = false
-        } else if (item === "birth_date" && (!dateRegex.test(form_data[item])
+        } else if (item === "birthDate" && (!dateRegex.test(form_data[item])
             || form_data[item].includes('.'))) {
             sendError("Birth date must be entered as dd/mm/yyyy", true)
             inputCheck = false
-        } else if (item === "join_date" && (!dateRegex.test(form_data[item])
+        } else if (item === "joinDate" && (!dateRegex.test(form_data[item])
             || form_data[item].includes('.'))){
             sendError("Join date must be entered as dd/mm/yyyy", true)
             inputCheck = false
@@ -250,7 +250,7 @@ function submitData(){
 
     let req = $.ajax({
         type: "POST",
-        url: "https://volthread-node.herokuapp.com/add",
+        url: "http://localhost:8080/add",
         dataType: 'json',
         contentType: 'application/json',
         data: JSON.stringify(form_data),
@@ -283,6 +283,7 @@ function submitData(){
                 }
             } catch (e) {
                 console.log(e)
+                sendError("Failed to add employee, check console for CORS error", true)
             }
         })
         .always(function() {
@@ -295,7 +296,7 @@ function clearForm(){
 }
 
 function getNewForCurrentPage() {
-    let url = 'https://volthread-node.herokuapp.com/employees'
+    let url = 'http://localhost:8080/employees'
     let params = 'page=' + activePage + '&items=' + parseInt($("#items-per-page option:selected").text())
     url += '?' + params;
     let request = new XMLHttpRequest();
@@ -319,12 +320,12 @@ function updatePage(){
 
 function addRow(emp){
     var item = " <tr>\n" +
-        "            <td>" + emp.employee_id +"</td>\n" +
+        "            <td>" + emp.id +"</td>\n" +
         "            <td>"+ emp.name +"</td>\n" +
         "            <td>"+ emp.surname +"</td>\n" +
         "            <td>"+emp.gender+"</td>\n" +
-        "            <td>"+emp.birth_date+"</td>\n" +
-        "            <td>"+emp.join_date+"</td>\n" +
+        "            <td>"+emp.birthDate+"</td>\n" +
+        "            <td>"+emp.joinDate+"</td>\n" +
         "        </tr>";
     $(".main-table tbody").append(item)
 }

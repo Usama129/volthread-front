@@ -1,0 +1,22 @@
+{
+  "name": "volthread-front",
+  "version": "1.0.0",
+  "description": "Front",
+  "main": "app.js",
+  "scripts": {
+    "test": "node app"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Usama129/volthread-front.git"
+  },
+  "author": "Usama Humayun",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Usama129/volthread-front/issues"
+  },
+  "homepage": "https://github.com/Usama129/volthread-front#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
