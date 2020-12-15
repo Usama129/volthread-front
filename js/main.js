@@ -7,60 +7,71 @@ let snackbar_name = 0, snackbar_uid = 0
 // it is different from uid, in that it is decremented by one when the snackbar has been utilised and timed out
 // uid is unique for every snackbar in the lifetime of this application
 
-$(document).ready(function() {
+let properties
 
-    $('#add-form-element').submit(function(event) {
-        event.preventDefault();
-    });
+$.getJSON('properties.json', function(data) {
+    properties = data
+}).then(() => {
+    $(document).ready(function() {
+        console.log("Using host " + properties.host)
 
-    let selected = $( "#items-per-page option:selected" ).text()
-    if (isNaN(parseInt(selected))){
-        selected = 0 // fetching all employees, a numeric items-per-page selection was not found
-    }
-    Promise.all([getPageCount(), getEmployees(1, selected)]).then(() => {
-        // making the table visible and the loader invisible once the data has been fetched
-        setPageNumbers()
-        $(".loader").css("display","none")
-        $(".main-table").css("display","table")
-        $(".pane").css("display","block")
-    });
+        $('#add-form-element').submit(function(event) {
+            event.preventDefault();
+        });
 
-    window.addEventListener('offline', (e) => {
-        sendError("You're offline", false)
-        online = false
-    })
-    window.addEventListener('online', (e) => {
-        sendError("Reloading...", false)
-        location.reload();
-    })
-
-    $(".addBtn").click(function () {
-        // open a form with a click on the Add button
-        if ($(".add-form-container").css("display") === "none"){
-            $(".add-form-container").css("display","block")
+        let selected = $( "#items-per-page option:selected" ).text()
+        if (isNaN(parseInt(selected))){
+            selected = 0 // fetching all employees, a numeric items-per-page selection was not found
         }
-    })
-
-    $( "#items-per-page" ).change(function () {
-        // this listener is called each time the dropdown selection is changed
-        $(".loader").css("display","block")
-        $(".main-table").css("display","none")
-        $(".pane").css("display","none")
-
-        $(".main-table tr:gt(0)").remove();
-        //let selectedPage = parseInt($(".pagination a.active").text())
-        let selectedOption = $( "#items-per-page option:selected" )
-        let selectedNumber = isNaN(parseInt(selectedOption.text())) ?
-            0 : parseInt(selectedOption.text()) // fetch all if NaN
-        Promise.all([getPageCount(), getEmployees(1, selectedNumber)]).then(() => {
+        Promise.all([getPageCount(), getEmployees(1, selected)]).then(() => {
             // making the table visible and the loader invisible once the data has been fetched
-            selectedNumber > 100 ? setPageNumbers(-1) : setPageNumbers(1)
+            setPageNumbers()
             $(".loader").css("display","none")
             $(".main-table").css("display","table")
             $(".pane").css("display","block")
+        }).catch((err) => {
+            console.log(err)
+        })
+
+        window.addEventListener('offline', (e) => {
+            sendError("You're offline", false)
+            online = false
+        })
+        window.addEventListener('online', (e) => {
+            sendError("Reloading...", false)
+            location.reload();
+        })
+
+        $(".addBtn").click(function () {
+            // open a form with a click on the Add button
+            if ($(".add-form-container").css("display") === "none"){
+                $(".add-form-container").css("display","block")
+            }
+        })
+
+        $( "#items-per-page" ).change(function () {
+            // this listener is called each time the dropdown selection is changed
+            $(".loader").css("display","block")
+            $(".main-table").css("display","none")
+            $(".pane").css("display","none")
+
+            $(".main-table tr:gt(0)").remove();
+            //let selectedPage = parseInt($(".pagination a.active").text())
+            let selectedOption = $( "#items-per-page option:selected" )
+            let selectedNumber = isNaN(parseInt(selectedOption.text())) ?
+                0 : parseInt(selectedOption.text()) // fetch all if NaN
+            Promise.all([getPageCount(), getEmployees(1, selectedNumber)]).then(() => {
+                // making the table visible and the loader invisible once the data has been fetched
+                selectedNumber > 100 ? setPageNumbers(-1) : setPageNumbers(1)
+                $(".loader").css("display","none")
+                $(".main-table").css("display","table")
+                $(".pane").css("display","block")
+            })
         })
     })
 })
+
+
 
 function sendError(error, displayTable){
     if (displayTable){
@@ -98,7 +109,7 @@ function getEmployees(pageNo, itemsPerPage){
     if (itemsPerPage > 100 || isNaN(pageNo))
         pageNo = 1
     return new Promise((resolve, reject) => {
-        $.get("http://localhost:8080/employees",
+        $.get(properties.host + "/employees",
             {page : pageNo, items : itemsPerPage},
             function(data) {
                 if (String(data.count) !== String(itemsPerPage))
@@ -201,7 +212,7 @@ function getPageCount(){
     let itemsPerPage = isNaN(parseInt($("#items-per-page option:selected").text())) ?
         0 : parseInt($("#items-per-page option:selected").text())
     return new Promise((resolve, reject) => {
-        $.get("http://localhost:8080/count", function (response) {
+        $.get(properties.host + "/count", function (response) {
             totalPages = itemsPerPage === 0 ? 1 : Math.ceil(response.employeeCount / itemsPerPage)
             resolve(totalPages)
         }).fail(function () {
@@ -250,7 +261,7 @@ function submitData(){
 
     let req = $.ajax({
         type: "POST",
-        url: "http://localhost:8080/add",
+        url: properties.host + "/add",
         dataType: 'json',
         contentType: 'application/json',
         data: JSON.stringify(form_data),
@@ -296,7 +307,7 @@ function clearForm(){
 }
 
 function getNewForCurrentPage() {
-    let url = 'http://localhost:8080/employees'
+    let url = properties.host + '/employees'
     let params = 'page=' + activePage + '&items=' + parseInt($("#items-per-page option:selected").text())
     url += '?' + params;
     let request = new XMLHttpRequest();
