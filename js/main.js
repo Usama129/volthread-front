@@ -253,12 +253,12 @@ function submitData(){
             inputCheck = false
         } else if (item === "birthDate" && (!dateRegex.test(form_data[item])
             || form_data[item].includes('.'))) {
-            sendError("Birth date must be entered as dd/mm/yyyy", true)
-            inputCheck = false
+            /*sendError("Birth date must be entered as dd/mm/yyyy", true)
+            inputCheck = false*/
         } else if (item === "joinDate" && (!dateRegex.test(form_data[item])
             || form_data[item].includes('.'))){
-            sendError("Join date must be entered as dd/mm/yyyy", true)
-            inputCheck = false
+          /*  sendError("Join date must be entered as dd/mm/yyyy", true)
+            inputCheck = false*/
         }
     }
     if (emptyField) {
@@ -268,15 +268,17 @@ function submitData(){
     if (!inputCheck)
         return
 
+    let final = JSON.stringify(form_data)
+
     let req = $.ajax({
         type: "POST",
         url: properties.host + "/add",
         dataType: 'json',
         contentType: 'application/json',
-        data: JSON.stringify(form_data),
+        data: final,
     })
         .done(function(data) {
-            if (data.submit === "successful") {
+            if (data.success) {
                 closeForm()
                 getNewForCurrentPage()
                 getPageCount().then((result) => {
@@ -289,26 +291,21 @@ function submitData(){
             try {
                 let response = data.responseJSON
                 if (response.error){
-                    if (response.error === "duplicate"){
-                        response.error = "Check ID - Employee record already exists"
-                    }
-                    sendError(response.error, true)
+
+                    sendError(response.error.message, true)
                 } else if (response.errors){
                     for (let one of response.errors){
                         sendError("Invalid value for " + one.param + ": " + one.value, true)
                     }
                 }
                 else{
-                    sendError(response, true)
+                    sendError(response.message, true)
                 }
             } catch (e) {
                 console.log(e)
                 sendError("Failed to add employee, check console for CORS error", true)
             }
         })
-        .always(function() {
-            //alert( "finished" );
-        });
 }
 
 function clearForm(){
@@ -332,7 +329,7 @@ function updatePage(){
     if (request.status === 200) {
         $(".main-table tr:gt(0)").remove();
         let response = JSON.parse(request.responseText)
-        for (let row of response.data){
+        for (let row of response.list){
             addRow(row)
         }
     }
