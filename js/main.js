@@ -308,7 +308,7 @@ function submitData(){
                 }
             } catch (e) {
                 console.log(e)
-                sendError("Failed to add employee, check console for CORS error", true)
+                sendError("Failed to add employee, check console for possible CORS error", true)
             }
         })
 }
