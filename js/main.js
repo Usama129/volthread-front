@@ -150,6 +150,10 @@ function setPageNumbers(active = 1){
         $(".pagination").append("<a class='enabled' id='firstPageBtn' onclick='goToPage(1)'>First</a>")
     }
 
+    if (active - 1 > 1){
+        $(".pagination").append("<a class='disabled ellipses'>...</a>")
+    }
+
     if (active === 1){
         $('#prevBtn').removeClass("enabled")
         $('#prevBtn').addClass("disabled")
@@ -161,6 +165,11 @@ function setPageNumbers(active = 1){
             continue
         $(".pagination").append("<a class='enabled' id="+i+">"+i+"</a>")
     }
+
+    if (active + 1 < totalPages){
+        $(".pagination").append("<a class='disabled ellipses'>...</a>")
+    }
+
     $( ".pagination a" ).click(function() {
         if(isNaN(parseInt($(this).text())))
             return
