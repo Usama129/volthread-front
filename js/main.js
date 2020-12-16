@@ -242,31 +242,33 @@ function submitData(){
         return obj;
     }, {});
 
-    let emptyField = false
-    let inputCheck = true
-    for (let item in form_data){
-        let dateRegex = /^(?:(?:31(\/|-|\.)(?:0?[13578]|1[02]))\1|(?:(?:29|30)(\/|-|\.)(?:0?[13-9]|1[0-2])\2))(?:(?:1[6-9]|[2-9]\d)?\d{2})$|^(?:29(\/|-|\.)0?2\3(?:(?:(?:1[6-9]|[2-9]\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\d|2[0-8])(\/|-|\.)(?:(?:0?[1-9])|(?:1[0-2]))\4(?:(?:1[6-9]|[2-9]\d)?\d{2})$/
-        if (!form_data[item]){
-            emptyField = true
-        } else if (item === "id" && /\D/.test(form_data[item])) {
-            sendError("ID must be numeric", true)
-            inputCheck = false
-        } else if (item === "birthDate" && (!dateRegex.test(form_data[item])
-            || form_data[item].includes('.'))) {
-            /*sendError("Birth date must be entered as dd/mm/yyyy", true)
-            inputCheck = false*/
-        } else if (item === "joinDate" && (!dateRegex.test(form_data[item])
-            || form_data[item].includes('.'))){
-          /*  sendError("Join date must be entered as dd/mm/yyyy", true)
-            inputCheck = false*/
+    if (properties.clientSideValidation == true){
+        let emptyField = false
+        let inputCheck = true
+        for (let item in form_data){
+            let dateRegex = /^(?:(?:31(\/|-|\.)(?:0?[13578]|1[02]))\1|(?:(?:29|30)(\/|-|\.)(?:0?[13-9]|1[0-2])\2))(?:(?:1[6-9]|[2-9]\d)?\d{2})$|^(?:29(\/|-|\.)0?2\3(?:(?:(?:1[6-9]|[2-9]\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\d|2[0-8])(\/|-|\.)(?:(?:0?[1-9])|(?:1[0-2]))\4(?:(?:1[6-9]|[2-9]\d)?\d{2})$/
+            if (!form_data[item]){
+                emptyField = true
+            } else if (item === "id" && /\D/.test(form_data[item])) {
+                sendError("ID must be numeric", true)
+                inputCheck = false
+            } else if (item === "birthDate" && (!dateRegex.test(form_data[item])
+                || form_data[item].includes('.'))) {
+                sendError("Birth date must be entered as dd/mm/yyyy", true)
+                inputCheck = false
+            } else if (item === "joinDate" && (!dateRegex.test(form_data[item])
+                || form_data[item].includes('.'))){
+                sendError("Join date must be entered as dd/mm/yyyy", true)
+                inputCheck = false
+            }
         }
+        if (emptyField) {
+            sendError("All fields are mandatory", true)
+            return
+        }
+        if (!inputCheck)
+            return
     }
-    if (emptyField) {
-        sendError("All fields are mandatory", true)
-        return
-    }
-    if (!inputCheck)
-        return
 
     let final = JSON.stringify(form_data)
 
