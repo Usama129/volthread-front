@@ -31,6 +31,7 @@ $.getJSON('properties.json', function(data) {
             $(".pane").css("display","block")
         }).catch((err) => {
             console.log(err)
+            sendError("Check if host is running at " + properties.host)
         })
 
         window.addEventListener('offline', (e) => {
