@@ -292,8 +292,12 @@ function submitData(){
             try {
                 if (data.responseJSON){
                     let response = data.responseJSON
-                    if (response.error){
-                        sendError(response.error.message, true)
+                    if (response.error ){
+                        if (response.error.message){
+                            sendError(response.error.message, true)
+                        }
+                    } else if (response.message){
+                        sendError(response.message, true)
                     } else if (response.errors){
                         for (let one of response.errors){
                             sendError("Invalid value for " + one.param + ": " + one.value, true)
