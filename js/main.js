@@ -293,16 +293,11 @@ function submitData(){
                 if (data.responseJSON){
                     let response = data.responseJSON
                     if (response.error){
-                        if (response.error === "duplicate"){
-                            response.error = "Check ID - Employee record already exists"
-                        }
-                        sendError(response.error, true)
+                        sendError(response.error.message, true)
                     } else if (response.errors){
                         for (let one of response.errors){
                             sendError("Invalid value for " + one.param + ": " + one.value, true)
                         }
-                    }  else {
-                        sendError(response, true)
                     }
                 } else if (data.responseText){
                     sendError(data.responseText)
