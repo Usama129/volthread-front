@@ -17,6 +17,6 @@ function ping(){
     http.request(pingOptions).end()
 }
 
-setInterval(ping, 20*60000) // ping heroku backend every 20 mins to keep it from idling
+setInterval(ping, 20*60000) // ping heroku backend every 20 minutes to keep it from idling
 
 app.listen(PORT, err => { console.log("Listening at " + PORT) })
