@@ -1,4 +1,4 @@
 {
-  "host": "https://volthread-spring-boot.herokuapp.com",
-  "clientSideValidation" : true
+  "host": "http://localhost:8080",
+  "clientSideValidation" : false
 }

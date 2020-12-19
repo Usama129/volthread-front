@@ -30,6 +30,14 @@ th {
     background-color: lightgray;
 }
 
+.selected {
+    background-color: deepskyblue;
+}
+
+tr:hover {
+    cursor: pointer;
+}
+
 td {
     text-align: center;
     height: 25px;
@@ -50,11 +58,8 @@ table {
     width: 75%;
 }
 
-.addBtn, .form-btn {
+.addBtn, .form-btn, .removeBtn, .deselectAllBtn {
     margin: 0 auto;
-    background-color: cornflowerblue;
-    border: 2px solid cornflowerblue;
-    color: #FFFFFF;
     padding: 10px 20px;
     text-align: center;
     border-radius: 12px;
@@ -66,9 +71,22 @@ table {
     outline:none;
 }
 
+.removeBtn, .deselectAllBtn{
+    background-color: red;
+    border: 2px solid red;
+    color: #FFFFFF;
+    display: none;
+}
+
+.addBtn, .form-btn, .deselectAllBtn {
+    background-color: cornflowerblue;
+    border: 2px solid cornflowerblue;
+    color: #FFFFFF;
+}
 
 
-.addBtn:hover, .form-btn:hover {
+
+.addBtn:hover, .form-btn:hover, .removeBtn:hover, .deselectAllBtn:hover {
     cursor: pointer;
     background-color: #FFFFFF;
     color: black;
@@ -215,20 +233,116 @@ select {
     background: #f1f1f1;
 }
 
-/* When the inputs get focus, do something */
 .add-form-element input:focus {
     background-color: #ddd;
     outline: none;
 }
 
-/* Add a red background color to the cancel button */
 .add-form-element .form-btn-cancel {
     background-color: red;
 }
 
-/* Add some hover effects to buttons */
 .add-form-element .form-btn:hover {
     opacity: 1;
+}
+
+.popup {
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 100%;
+    background-color: rgba(94,110,141,.9);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s 0s, visibility 0s 0.3s;
+}
+
+.popup.is-visible {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.3s 0s, visibility 0s 0s;
+}
+
+.popup-container {
+    transform: translateY(-40px);
+    transition-property: transform;
+    transition-duration: 0.3s;
+    position: relative;
+    width: 90%;
+    max-width: 400px;
+    margin: 4em auto;
+    background: #fff;
+    border-radius: .25em .25em .4em .4em;
+    text-align: center;
+    box-shadow: 0 0 20px rgba(0,0,0,.2);
+}
+
+.popup-container .popup-buttons li {
+    float: left;
+    width: 50%;
+}
+
+.popup-container .popup-buttons li:first-child a {
+    background: #fc7169;
+    border-radius: 0 0 0 .25em;
+}
+
+.popup-container .popup-buttons li:first-child a:hover {
+    background-color: #fc8982;
+}
+
+.cross {
+    display: inline-block;
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 30px;
+    height: 30px;
+    opacity: 1;
+    color: transparent;
+    white-space: nowrap;
+}
+
+.cross::before {
+    content: 'x';
+    color: grey;
+    transform: rotate(45deg);
+}
+
+.popup-container .popup-buttons li:last-child a {
+    background: #b6bece;
+    border-radius: 0 0 .25em 0;
+}
+
+.popup-container .popup-buttons li:last-child a:hover {
+    background-color: #c5ccd8;
+}
+
+.popup-container .popup-buttons a {
+    cursor: pointer;
+    display: block;
+    height: 60px;
+    line-height: 60px;
+    text-transform: uppercase;
+    color: #fff;
+    text-decoration: none;
+    -webkit-transition: background-color .2s;
+    -moz-transition: background-color .2s;
+    transition: background-color .2s;
+}
+
+.popup-container p {
+    padding: 3em 1em 1em 1em ;
+}
+
+.popup-container ul {
+    list-style: none;
+    padding: 1em 0em;
+}
+
+.is-visible .popup-container {
+    transform: translateY(0);
 }
 
 @-webkit-keyframes spin {

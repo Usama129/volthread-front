@@ -7,6 +7,59 @@ let snackbar_name = 0, snackbar_uid = 0
 // it is different from uid, in that it is decremented by one when the snackbar has been utilised and timed out
 // uid is unique for every snackbar in the lifetime of this application
 
+let selectedIDs = []
+
+// Attaching listeners for selected row list below
+Array.prototype.listeners = {}
+Array.prototype.addListener = function(eventName, callback) {
+    if (!this.listeners[eventName]) {
+        // Create a new array for new events
+        // idea of an array is we can invoke all callbacks
+        this.listeners[eventName] = []
+    }
+    this.listeners[eventName].push(callback)
+}
+// New push Method
+// Calls trigger event
+Array.prototype.pushWithEvent = function() {
+    const size = this.length
+    let addingToZero = false
+    if (size === 0)
+        addingToZero = true
+    const argsList = Array.prototype.slice.call(arguments)
+    for (let index = 0; index < argsList.length; index++) {
+        this[size + index] = argsList[index]
+    }
+    // trigger add event
+    this.triggerEvent('add', argsList)
+    if (addingToZero && this.length > 0)
+        this.triggerEvent('addingToZero')
+}
+Array.prototype.removeWithEvent = function() {
+    const argsList = Array.prototype.slice.call(arguments)
+    let removed = []
+    for (let arg of argsList) {
+        if (this.indexOf(arg) !== -1) {
+            this.splice(this.indexOf(arg), 1)
+            removed.push(arg)
+        }
+    }
+    // trigger remove event
+    if (removed.length > 0){
+        this.triggerEvent('remove', removed)
+    }
+    if (this.length === 0)
+        this.triggerEvent('empty')
+}
+Array.prototype.triggerEvent = function(eventName, elements) {
+    if (this.listeners[eventName] && this.listeners[eventName].length) {
+        this.listeners[eventName].forEach(callback =>
+            callback(eventName, elements, this)
+        )
+    }
+}
+// Array listeners end here
+
 let properties
 
 $.getJSON('properties.json', function(data) {
@@ -17,7 +70,7 @@ $.getJSON('properties.json', function(data) {
 
         $('#add-form-element').submit(function(event) {
             event.preventDefault();
-        });
+        })
 
         let selected = $( "#items-per-page option:selected" ).text()
         if (isNaN(parseInt(selected))){
@@ -43,11 +96,62 @@ $.getJSON('properties.json', function(data) {
             location.reload();
         })
 
+        // listening for selected rows
+        selectedIDs.addListener('add', (items, args) => {
+            for (let one of args){
+                $('tr#'+one).addClass('selected')
+            }
+            $('#deselectAllBtn').html("Clear " + selectedIDs.length + " selection" +
+                (selectedIDs.length === 1 ? "" : "s"))
+        })
+
+        // listening for deselected rows
+        selectedIDs.addListener('remove', (items, args) => {
+            for (let one of args){
+                $('tr#'+one).removeClass('selected')
+            }
+            $('#deselectAllBtn').html("Clear " + selectedIDs.length + " selection" +
+                (selectedIDs.length === 1 ? "" : "s"))
+        })
+
+        // listening for change of selected items from zero to one
+        selectedIDs.addListener('addingToZero', () => {
+            $('#removeBtn').css('display','inline-block')
+            $('#deselectAllBtn').css('display','inline-block')
+        })
+
+        // listening for change of selected items to none
+        selectedIDs.addListener('empty', () => {
+            $('#removeBtn').css('display','none')
+            $('#deselectAllBtn').css('display','none')
+        })
+
         $(".addBtn").click(function () {
             // open a form with a click on the Add button
             if ($(".add-form-container").css("display") === "none"){
                 $(".add-form-container").css("display","block")
             }
+        })
+
+        $(".deselectAllBtn").click(function () {
+            while (selectedIDs.length != 0){
+                selectedIDs.removeWithEvent(selectedIDs[0])
+            }
+        })
+        
+        $("#removeBtn").click(function () {
+            $('.prompt').html("Are you sure you want to delete " + selectedIDs.length
+                + " selected employee record" + (selectedIDs.length > 1 ? "s" : "")+ "?")
+            $('.popup').addClass('is-visible')
+        })
+
+        $("#XPopupBtn, #NoPopupBtn").click(function () {
+            $('.popup').removeClass('is-visible')
+        })
+
+        $("#YesPopupBtn").click(function () {
+            removeSelectedEmployees()
+            $('.popup').removeClass('is-visible')
         })
 
         $( "#items-per-page" ).change(function () {
@@ -296,9 +400,7 @@ function submitData(){
                 if (data.responseJSON){
                     let response = data.responseJSON
                     if (response.error ){
-                        if (response.error.message){
-                            sendError(response.error.message, true)
-                        }
+                        sendError(response.error, true)
                     } else if (response.message){
                         sendError(response.message, true)
                     } else if (response.errors){
@@ -314,6 +416,30 @@ function submitData(){
                 sendError("Failed to add employee, check console for possible CORS error", true)
             }
         })
+}
+
+function removeSelectedEmployees() {
+    let data = {idList: selectedIDs}
+
+    $.ajax({
+        url: properties.host + "/delete",
+        type: 'DELETE',
+        dataType: 'json',
+        contentType: 'application/json',
+        data: JSON.stringify(data),
+    }).done(function (data) {
+        if (data.success){
+            getNewForCurrentPage()
+            getPageCount().then((result) => {
+                setPageNumbers(activePage)
+            })
+            while (selectedIDs.length != 0){
+                selectedIDs.removeWithEvent(selectedIDs[0])
+            }
+            sendError("Successfully deleted " + data.rowsChanged + " employee" +
+                (data.rowsChanged > 1 ? "s" : ""), true)
+        }
+    })
 }
 
 function clearForm(){
@@ -337,6 +463,10 @@ function updatePage(){
     if (request.status === 200) {
         $(".main-table tr:gt(0)").remove();
         let response = JSON.parse(request.responseText)
+        if (response.count === 0){
+            goToPage(activePage-1)
+            return
+        }
         for (let row of response.list){
             addRow(row)
         }
@@ -344,7 +474,8 @@ function updatePage(){
 }
 
 function addRow(emp){
-    var item = " <tr>\n" +
+    let className = selectedIDs.includes(emp.id) ? "selected" : ""
+    var item = " <tr id='"+emp.id+"' onclick='clickRow("+emp.id+")' class='"+className+"'>\n" +
         "            <td>" + emp.id +"</td>\n" +
         "            <td>"+ emp.name +"</td>\n" +
         "            <td>"+ emp.surname +"</td>\n" +
@@ -353,4 +484,12 @@ function addRow(emp){
         "            <td>"+emp.joinDate+"</td>\n" +
         "        </tr>";
     $(".main-table tbody").append(item)
+}
+
+function clickRow(id) {
+    if (selectedIDs.includes(id)){
+        selectedIDs.removeWithEvent(id)
+    } else {
+        selectedIDs.pushWithEvent(id)
+    }
 }

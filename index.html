@@ -13,8 +13,20 @@
 <body>
     <h1>VolThread Employee Data</h1>
     <p class="error">Error</p>
+    <div class="popup" role="alert">
+        <div class="popup-container">
+            <p class="prompt"></p>
+            <ul class="popup-buttons">
+                <li><a id='YesPopupBtn' >Yes</a></li>
+                <li><a id='NoPopupBtn' >No</a></li>
+            </ul>
+            <a  id='XPopupBtn' class="cross"></a>
+        </div>
+    </div>
     <div class="pane">
         <button class="addBtn" id="addBtn">Add</button>
+        <button class="removeBtn" id="removeBtn">Remove Selected</button>
+        <button class="deselectAllBtn" id="deselectAllBtn">Clear Selections</button>
         <div class="pagination">
         </div>
         <select class="items-per-page" id="items-per-page">
