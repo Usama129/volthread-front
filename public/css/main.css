@@ -56,6 +56,7 @@ table {
     margin-left: auto;
     margin-right: auto;
     width: 75%;
+    height: 50px;
 }
 
 .addBtn, .form-btn, .removeBtn, .deselectAllBtn {
@@ -90,6 +91,25 @@ table {
     cursor: pointer;
     background-color: #FFFFFF;
     color: black;
+}
+
+.searchContainer {
+    float: left;
+    width: 350px;
+}
+
+#searchIcon {
+    padding-left: 1em;
+    padding-right: 1em;
+}
+
+.searchBar {
+    border: 3px solid #00B4CC;
+    padding: 5px;
+    height: 20px;
+    border-radius: 12px;
+    outline: none;
+    color: #9DBFAF;
 }
 
 select {
@@ -179,7 +199,6 @@ select {
     animation: fadein 0.5s, fadeout 0.5s 2.5s;;
 }
 
-/* The popup form - hidden by default */
 .add-form-container {
     border-radius: 12px;
     display: none;

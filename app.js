@@ -5,16 +5,11 @@ const app = express()
 
 const PORT = process.env.PORT || 9090
 
-app.use(express.static(__dirname))
-
-let pingOptions = {
-    host: 'https://volthread-spring-boot.herokuapp.com',
-    path: '/ping'
-}
+app.use(express.static(__dirname + "/public"))
 
 function ping(){
     console.log("Pinging at " + new Date())
-    http.request(pingOptions).end()
+    http.get('http://volthread-spring-boot.herokuapp.com/ping')
 }
 
 setInterval(ping, 20*60000) // ping heroku backend every 20 minutes to keep it from idling
