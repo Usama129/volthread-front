@@ -73,6 +73,7 @@ table {
 }
 
 .removeBtn, .deselectAllBtn{
+    margin-left: 10px;
     background-color: red;
     border: 2px solid red;
     color: #FFFFFF;
@@ -95,7 +96,7 @@ table {
 
 .searchContainer {
     float: left;
-    width: 350px;
+    width: 250px;
 }
 
 #searchIcon {
@@ -104,7 +105,8 @@ table {
 }
 
 .searchBar {
-    border: 3px solid #00B4CC;
+    margin-left: 20px;
+    border: 3px solid cornflowerblue;
     padding: 5px;
     height: 20px;
     border-radius: 12px;

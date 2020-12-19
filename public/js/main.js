@@ -72,20 +72,7 @@ $.getJSON('properties.json', function(data) {
             event.preventDefault();
         })
 
-        let selected = $( "#items-per-page option:selected" ).text()
-        if (isNaN(parseInt(selected))){
-            selected = 0 // fetching all employees, a numeric items-per-page selection was not found
-        }
-        Promise.all([getPageCount(), getEmployees(1, selected)]).then(() => {
-            // making the table visible and the loader invisible once the data has been fetched
-            setPageNumbers()
-            $(".loader").css("display","none")
-            $(".main-table").css("display","table")
-            $(".pane").css("display","block")
-        }).catch((err) => {
-            console.log(err)
-            sendError("Check if host is running at " + properties.host)
-        })
+        loadInitial()
 
         window.addEventListener('offline', (e) => {
             sendError("You're offline", false)
@@ -94,6 +81,40 @@ $.getJSON('properties.json', function(data) {
         window.addEventListener('online', (e) => {
             sendError("Reloading...", false)
             location.reload();
+        })
+
+        $("#searchBar").on("change paste keyup", function() {
+
+            if ($(this).val() === "") {
+                $("#items-per-page").val('50')
+                loadInitial()
+            }
+            else {
+                $("#items-per-page").val('-1')
+                searchEmployees($(this).val()).then(result => {
+                    count = result.count
+                    totalPages = 1
+                    setPageNumbers(1)
+                    // displaying loader while changing data
+                    $(".loader").css("display","block")
+                    $(".main-table").css("display","none")
+                    $(".main-table tr:gt(0)").remove()
+                    try {
+                        if (count > 0){
+                            for (let emp of result.list){
+                                addRow(emp)
+                            }
+                        } else {
+                            $(".main-table tbody").append("<tr><td colspan='6'>No results</td></tr>")
+                        }
+                        $(".loader").css("display","none")
+                        $(".main-table").css("display","table")
+                    } catch (e){
+                        console.log(e)
+                        sendError("Error occurred while parsing response from server", false)
+                    }
+                })
+            }
         })
 
         // listening for selected rows
@@ -118,12 +139,14 @@ $.getJSON('properties.json', function(data) {
         selectedIDs.addListener('addingToZero', () => {
             $('#removeBtn').css('display','inline-block')
             $('#deselectAllBtn').css('display','inline-block')
+            $('.searchContainer').css('display','none')
         })
 
         // listening for change of selected items to none
         selectedIDs.addListener('empty', () => {
             $('#removeBtn').css('display','none')
             $('#deselectAllBtn').css('display','none')
+            $('.searchContainer').css('display','block')
         })
 
         $(".addBtn").click(function () {
@@ -160,7 +183,7 @@ $.getJSON('properties.json', function(data) {
             $(".main-table").css("display","none")
             $(".pane").css("display","none")
 
-            $(".main-table tr:gt(0)").remove();
+            $(".main-table tr:gt(0)").remove()
             //let selectedPage = parseInt($(".pagination a.active").text())
             let selectedOption = $( "#items-per-page option:selected" )
             let selectedNumber = isNaN(parseInt(selectedOption.text())) ?
@@ -176,7 +199,26 @@ $.getJSON('properties.json', function(data) {
     })
 })
 
+function loadInitial(){
+    $(".loader").css("display","block")
+    $(".main-table").css("display","none")
+    $(".main-table tr:gt(0)").remove()
+    let selected = $( "#items-per-page option:selected" ).text()
+    if (isNaN(parseInt(selected))){
+        selected = 0 // fetching all employees, a numeric items-per-page selection was not found
+    }
 
+    Promise.all([getPageCount(), getEmployees(1, selected)]).then(() => {
+        // making the table visible and the loader invisible once the data has been fetched
+        setPageNumbers()
+        $(".loader").css("display","none")
+        $(".main-table").css("display","table")
+        $(".pane").css("display","block")
+    }).catch((err) => {
+        console.log(err)
+        sendError("Check if host is running at " + properties.host)
+    })
+}
 
 function sendError(error, displayTable){
     if (displayTable){
@@ -206,6 +248,21 @@ function sendError(error, displayTable){
         var id = snackbar_name
         $("#"+id+".snackbar").removeClass("show")
     }, 3000)*/
+}
+
+function searchEmployees(surname){
+
+    return new Promise((resolve, reject) => {
+
+        $.get(properties.host + "/search",
+            {search : surname, items : 0},
+            function(data) {
+               resolve(data)
+            }).fail(function () {
+            sendError("Error: Check request", false)
+            reject()
+        });
+    })
 }
 
 function getEmployees(pageNo, itemsPerPage){
@@ -305,9 +362,9 @@ function goToPage(page){
     $(".loader").css("display","block")
     $(".main-table").css("display","none")
 
-    $(".pagination").find("a").removeClass( "active" );
+    $(".pagination").find("a").removeClass( "active" )
     $(this).addClass("active")
-    $(".main-table tr:gt(0)").remove();
+    $(".main-table tr:gt(0)").remove()
     if (!isNaN(page)){
         activePage = page
         getEmployees(page, $( "#items-per-page option:selected" ).text()).then(() => {
@@ -461,7 +518,7 @@ function updatePage(){
     if (request.readyState !== 4)
         return
     if (request.status === 200) {
-        $(".main-table tr:gt(0)").remove();
+        $(".main-table tr:gt(0)").remove()
         let response = JSON.parse(request.responseText)
         if (response.count === 0){
             goToPage(activePage-1)
