@@ -2,6 +2,7 @@ let online = true // internet connection status
 let count = 0 // count of current rows
 let activePage
 let totalPages = 0
+let searching = false
 let snackbar_name = 0, snackbar_uid = 0
 // snackbar name is an integer id that is used to adjust the heights of snackbars on top of each other
 // it is different from uid, in that it is decremented by one when the snackbar has been utilised and timed out
@@ -83,13 +84,15 @@ $.getJSON('properties.json', function(data) {
             location.reload();
         })
 
-        $("#searchBar").on("change paste keyup", function() {
+        $("#searchBar").on("change paste keyup manual", function() {
 
             if ($(this).val() === "") {
+                searching = false
                 $("#items-per-page").val('50')
                 loadInitial()
             }
             else {
+                searching = true
                 $("#items-per-page").val('-1')
                 searchEmployees($(this).val()).then(result => {
                     count = result.count
@@ -486,10 +489,14 @@ function removeSelectedEmployees() {
         data: JSON.stringify(data),
     }).done(function (data) {
         if (data.success){
-            getNewForCurrentPage()
-            getPageCount().then((result) => {
-                setPageNumbers(activePage)
-            })
+            if (searching){
+                $('.searchBar').trigger("manual")
+            } else {
+                getNewForCurrentPage()
+                getPageCount().then((result) => {
+                    setPageNumbers(activePage)
+                })
+            }
             while (selectedIDs.length != 0){
                 selectedIDs.removeWithEvent(selectedIDs[0])
             }
