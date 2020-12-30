@@ -479,6 +479,13 @@ function submitData(){
 }
 
 function removeSelectedEmployees() {
+
+    if (selectedIDs.length > 5){
+        sendError("Cannot remove more than 5 employees at a time", true)
+        return
+    }
+
+
     let data = {idList: selectedIDs}
 
     $.ajax({

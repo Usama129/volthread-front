@@ -1,4 +1,4 @@
 {
-  "host": "https://volthread-spring-boot.herokuapp.com",
+  "host": "https://employees-sb.herokuapp.com",
   "clientSideValidation" : false
 }
