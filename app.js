@@ -9,7 +9,7 @@ app.use(express.static(__dirname + "/public"))
 
 function ping(){
     console.log("Pinging at " + new Date())
-    http.get('http://volthread-spring-boot.herokuapp.com/ping')
+    http.get('https://employees-sb.herokuapp.com')
 }
 
 setInterval(ping, 20*60000) // ping heroku backend every 20 minutes to keep it from idling
